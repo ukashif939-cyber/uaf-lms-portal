@@ -1,0 +1,44 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:prod": "node production.js",
+    "dev": "node --watch server.js",
+    "setup": "npx prisma db push && node scripts/seed-demo.js && node scripts/sync-firebase-users.js",
+    "setup:demo": "npx prisma db push && node scripts/seed-demo.js",
+    "seed:google": "node scripts/seed-google-users.js",
+    "setup:firebase": "node scripts/sync-firebase-users.js",
+    "test:auth": "node scripts/test-auth.js",
+    "test:firebase": "node scripts/test-firebase-auth.js",
+    "test:google": "node scripts/test-google-user.js",
+    "test:google-ui": "node scripts/test-google-login-ui.js",
+    "test:demo": "node scripts/test-demo.js",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init",
+    "prisma:push": "npx prisma db push",
+    "seed": "node prisma/seed.js",
+    "seed:100students": "node prisma/seed100students.js",
+    "seed:all": "npm run seed && npm run seed:100students"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcrypt": "^5.1.0",
+    "body-parser": "^2.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jose": "^6.2.3",
+    "prisma": "^6.19.3",
+    "uuid": "^13.0.0"
+  }
+}

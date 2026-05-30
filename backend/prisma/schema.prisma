@@ -1,0 +1,421 @@
+// ============================================================
+// UAF LMS — PostgreSQL Schema (Prisma ORM)
+// Covers: Auth, Profiles, Courses, Attendance, Grades,
+//         Marks, Fees, Hostel, Library, Feedback, Surveys,
+//         Notifications, AI Logs
+// ============================================================
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LEAVE
+  LATE
+}
+
+enum AssessmentType {
+  QUIZ
+  ASSIGNMENT
+  MID_TERM
+  FINAL_EXAM
+  LAB
+  PROJECT
+  PRESENTATION
+}
+
+enum FeeType {
+  TUITION
+  HOSTEL
+  EXAMINATION
+  LIBRARY
+  SPORTS
+  REGISTRATION
+  OTHER
+}
+
+enum FeeStatus {
+  PENDING
+  PAID
+  OVERDUE
+  WAIVED
+}
+
+enum ResourceType {
+  BOOK
+  EBOOK
+  JOURNAL
+  THESIS
+  MAGAZINE
+  VIDEO_LECTURE
+}
+
+enum NotificationType {
+  FEE_REMINDER
+  ATTENDANCE_ALERT
+  GRADE_RELEASED
+  SURVEY_INVITE
+  GENERAL
+  AI_INSIGHT
+}
+
+// ─────────────────────────────────────────────
+// USER & AUTH
+// ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+
+  googleId    String?  @unique
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ✅ FIX: Relations were previously outside the model block — moved inside
+  profile         Profile?
+  enrollments     Enrollment[]
+  feeVouchers     FeeVoucher[]
+  feedbacks       Feedback[]
+  surveyResponses SurveyResponse[]
+  notifications   Notification[]
+  aiLogs          AiLog[]
+  teacherCourses  TeacherCourse[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Profile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Personal Info
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime?
+  gender          Gender?
+  nic             String? // encrypted at app layer
+  phone           String?
+  address         String?
+  profileImageUrl String?
+
+  // Academic Info
+  registrationId   String @unique // e.g. 2021-ag-7001
+  department       String // e.g. "Computer Science"
+  program          String // e.g. "BS Computer Science"
+  currentSemester  Int    @default(1)
+  enrollmentYear   Int
+  expectedGradYear Int?
+  cgpa             Float? @default(0.0)
+
+  // Hostel
+  isHostelResident Boolean @default(false)
+  hostelBlock      String?
+  roomNumber       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([registrationId])
+  @@index([department])
+}
+
+// ─────────────────────────────────────────────
+// COURSES
+// ─────────────────────────────────────────────
+
+model Course {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g. CS-401
+  name        String // e.g. "Database Systems"
+  creditHours Int
+  department  String
+  semester    Int // which semester it belongs to (1-8)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments    Enrollment[]
+  teacherCourses TeacherCourse[]
+
+  @@index([department])
+  @@index([semester])
+}
+
+model TeacherCourse {
+  id        String @id @default(uuid())
+  teacherId String
+  courseId  String
+  session   String // e.g. "Fall-2024"
+  teacher   User   @relation(fields: [teacherId], references: [id])
+  course    Course @relation(fields: [courseId], references: [id])
+
+  @@unique([teacherId, courseId, session])
+}
+
+// ─────────────────────────────────────────────
+// ENROLLMENTS (Student ↔ Course bridge)
+// ─────────────────────────────────────────────
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  studentId String
+  courseId  String
+  session   String // e.g. "Fall-2024"
+  student   User     @relation(fields: [studentId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+
+  attendance Attendance[]
+  marks      Mark[]
+  grade      Grade?
+
+  @@unique([studentId, courseId, session])
+  @@index([studentId])
+  @@index([session])
+}
+
+// ─────────────────────────────────────────────
+// ATTENDANCE
+// ─────────────────────────────────────────────
+
+model Attendance {
+  id           String           @id @default(uuid())
+  enrollmentId String
+  enrollment   Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  date         DateTime
+  status       AttendanceStatus @default(PRESENT)
+  remarks      String?
+  markedById   String? // teacher/admin who marked it
+  createdAt    DateTime         @default(now())
+
+  @@unique([enrollmentId, date])
+  @@index([date])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// MARKS (per assessment)
+// ─────────────────────────────────────────────
+
+model Mark {
+  id            String         @id @default(uuid())
+  enrollmentId  String
+  enrollment    Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  type          AssessmentType
+  title         String // e.g. "Quiz 1", "Mid Term"
+  obtainedMarks Float
+  totalMarks    Float
+  weightPercent Float // e.g. 10 for a 10% quiz
+  conductedAt   DateTime
+  createdAt     DateTime       @default(now())
+
+  @@index([enrollmentId])
+  @@index([type])
+}
+
+// ─────────────────────────────────────────────
+// GRADES (final per course per session)
+// ─────────────────────────────────────────────
+
+model Grade {
+  id            String     @id @default(uuid())
+  enrollmentId  String     @unique
+  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  letterGrade   String // A+, A, B+, B, C+, C, D, F
+  gradePoints   Float // 4.0, 3.7, 3.3 ...
+  totalMarksObt Float
+  totalMarksMax Float
+  session       String
+  isReleased    Boolean  @default(false)
+  releasedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([session])
+}
+
+// ─────────────────────────────────────────────
+// FEES
+// ─────────────────────────────────────────────
+
+model FeeVoucher {
+  id         String    @id @default(uuid())
+  studentId  String
+  student    User      @relation(fields: [studentId], references: [id])
+  voucherNo  String    @unique // e.g. UAF-2024-001234
+  amount     Float
+  type       FeeType   @default(TUITION)
+  status     FeeStatus @default(PENDING)
+  semester   Int
+  session    String
+  dueDate    DateTime
+  paidAt     DateTime?
+  paidAmount Float?
+  bankRef    String? // bank transaction reference
+  remarks    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+// ─────────────────────────────────────────────
+// LIBRARY
+// ─────────────────────────────────────────────
+
+model LibraryResource {
+  id           String       @id @default(uuid())
+  title        String
+  author       String
+  type         ResourceType
+  category     String // e.g. "Computer Science", "Agriculture"
+  isbn         String?
+  publishYear  Int?
+  edition      String?
+  url          String? // for ebooks/journals
+  totalCopies  Int          @default(1)
+  availCopies  Int          @default(1)
+  thumbnailUrl String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+
+  borrowings LibraryBorrowing[]
+
+  @@index([type])
+  @@index([category])
+}
+
+model LibraryBorrowing {
+  id         String          @id @default(uuid())
+  resourceId String
+  resource   LibraryResource @relation(fields: [resourceId], references: [id])
+  studentId  String
+  borrowedAt DateTime        @default(now())
+  dueDate    DateTime
+  returnedAt DateTime?
+  fineAmount Float?          @default(0)
+
+  @@index([studentId])
+}
+
+// ─────────────────────────────────────────────
+// FEEDBACK
+// ─────────────────────────────────────────────
+
+model Feedback {
+  id        String   @id @default(uuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  courseId  String?
+  category  String // "Teaching", "Facilities", "Online Classes"
+  rating    Int // 1-5
+  comment   String?
+  // AI analysis fields
+  sentiment String? // "positive", "neutral", "negative"
+  aiSummary String?
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+  @@index([category])
+  @@index([rating])
+}
+
+// ─────────────────────────────────────────────
+// SURVEYS
+// ─────────────────────────────────────────────
+
+model Survey {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  questions   Json // array of {id, question, type, options[]}
+  isActive    Boolean   @default(true)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  responses SurveyResponse[]
+}
+
+model SurveyResponse {
+  id        String   @id @default(uuid())
+  surveyId  String
+  survey    Survey   @relation(fields: [surveyId], references: [id])
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  answers   Json // {questionId: answer}
+  createdAt DateTime @default(now())
+
+  @@unique([surveyId, studentId])
+  @@index([surveyId])
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATIONS / REMINDERS
+// ─────────────────────────────────────────────
+
+model Notification {
+  id           String           @id @default(uuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  message      String
+  type         NotificationType @default(GENERAL)
+  isRead       Boolean          @default(false)
+  sentViaEmail Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+// ─────────────────────────────────────────────
+// AI LOGS (chatbot + recommendations)
+// ─────────────────────────────────────────────
+
+model AiLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  feature   String // "chatbot", "recommendation", "prediction", "feedback_analysis"
+  prompt    String
+  response  String
+  tokens    Int?
+  latencyMs Int?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([feature])
+}

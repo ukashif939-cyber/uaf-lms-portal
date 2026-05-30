@@ -1,0 +1,9 @@
+{
+  "name": "uaf-lms-portal",
+  "private": true,
+  "scripts": {
+    "prepare:firebase": "node scripts/prepare-firebase-deploy.js",
+    "build:frontend": "cd frontend && npm run build",
+    "deploy": "node scripts/prepare-firebase-deploy.js && cd frontend && npm run build && cd .. && cd functions && npm install && cd .. && npx firebase-tools deploy --project uaf-lms-main"
+  }
+}
