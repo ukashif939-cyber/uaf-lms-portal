@@ -94,16 +94,6 @@ cd frontend && npm run dev   # port 3000
 
 ---
 
-## Mobile / API on Render (no Blaze required)
-
-If Cloud Functions are blocked (Spark plan), deploy the API on Render:
-
-1. https://dashboard.render.com/blueprint/new → connect this repo  
-2. `render.yaml` deploys **uaf-lms-api**  
-3. Production frontend uses `https://uaf-lms-api.onrender.com`  
-
-See [MOBILE_FIX.md](./MOBILE_FIX.md).
-
 ## Demo accounts
 
 See `TEST_ACCOUNTS.md` — 9 login accounts, ~100 display-only students for admin stats.

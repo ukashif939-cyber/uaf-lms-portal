@@ -8,11 +8,9 @@ export type StoredUser = {
   avatar?: string;
 };
 
-/** Resolve API base at request time. Empty env = same-origin (Firebase). */
 function getApiBase() {
   const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (envUrl === "") return "";
-  if (envUrl) return envUrl.replace(/\/$/, "");
+  if (envUrl !== undefined && envUrl !== "") return envUrl;
   if (typeof window !== "undefined") return "";
   return "http://localhost:5000";
 }
@@ -67,20 +65,10 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
     if (user?.id) headers.set("x-user-id", user.id);
   }
 
-  const base = getApiBase();
-  let response: Response;
-  try {
-    response = await fetch(`${base}${path}`, {
-      ...init,
-      headers,
-    });
-  } catch {
-    throw new Error(
-      base.includes("localhost")
-        ? "Cannot reach the API. On mobile, use the deployed site (uaf-lms-main.web.app), not localhost."
-        : "Cannot reach the server. Check your connection and try again."
-    );
-  }
+  const response = await fetch(`${getApiBase()}${path}`, {
+    ...init,
+    headers,
+  });
 
   if (!response.ok) {
     let message = `Request failed: ${response.status}`;

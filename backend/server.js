@@ -35,21 +35,14 @@ app.use(cors({
       /\.web\.app$/.test(origin) ||
       /\.firebaseapp\.com$/.test(origin) ||
       /\.trycloudflare\.com$/.test(origin) ||
-      /\.loca\.lt$/.test(origin) ||
-      /\.onrender\.com$/.test(origin) ||
-      /\.vercel\.app$/.test(origin)
+      /\.loca\.lt$/.test(origin)
     ) {
-      return cb(null, true);
-    }
-    // Mobile browsers / Firebase Hosting: allow production origins
-    if (process.env.K_SERVICE || process.env.FUNCTIONS_EMULATOR) {
       return cb(null, true);
     }
     cb(null, allowed[0]);
   },
   credentials: true,
 }));
-app.options("*", cors());
 app.use(bodyParser.json({ limit: "5mb" }));
 
 const toClientUser = (u) => ({
