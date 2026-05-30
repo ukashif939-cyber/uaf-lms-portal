@@ -1,3 +1,7 @@
+# DISPLAY-ONLY STUDENTS (cannot log in)
+# Used for admin dashboard stats (~100 users). Password below is NOT for portal login.
+# Portal logins: see TEST_ACCOUNTS.md (9 accounts only).
+
 001. ali.khan.cs001@uaf.edu.pk / Student@UAF2024
 002. fatima.zahra.cs002@uaf.edu.pk / Student@UAF2024
 003. usman.raza.cs003@uaf.edu.pk / Student@UAF2024

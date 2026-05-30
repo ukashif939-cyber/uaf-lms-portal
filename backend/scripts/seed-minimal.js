@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 const DEMO_USERS = [
   {
     email: "admin@uaf.edu.pk",
-    password: "admin123",
+    password: "admin",
     role: "ADMIN",
     profile: {
       firstName: "Dr. Faheem",
@@ -121,7 +121,7 @@ async function main() {
 
   console.log("\nDemo credentials:");
   console.log("  Student: ali.khan@uaf.edu.pk / password123");
-  console.log("  Admin:   admin@uaf.edu.pk / admin123");
+  console.log("  Admin:   admin@uaf.edu.pk / admin");
 }
 
 main()

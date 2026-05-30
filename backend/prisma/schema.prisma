@@ -1,5 +1,5 @@
 // ============================================================
-// UAF LMS — PostgreSQL Schema (Prisma ORM)
+// UAF LMS — Prisma schema (SQLite for local/demo; PostgreSQL-compatible models)
 // Covers: Auth, Profiles, Courses, Attendance, Grades,
 //         Marks, Fees, Hostel, Library, Feedback, Surveys,
 //         Notifications, AI Logs

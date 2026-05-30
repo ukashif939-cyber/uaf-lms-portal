@@ -578,9 +578,10 @@ async function main() {
     console.log(`║  ${k.padEnd(18)} → ${String(v).padStart(7)} rows  ║`);
   }
   console.log("╠══════════════════════════════════════╣");
-  console.log("║  TEST LOGINS:                        ║");
+  console.log("║  DEMO LOGINS (see TEST_ACCOUNTS.md): ║");
   console.log("║  admin@uaf.edu.pk / admin             ║");
-  console.log("║  Any student email / password123      ║");
+  console.log("║  5 UAF students / password123         ║");
+  console.log("║  3 Google accounts (sign-in button)   ║");
   console.log("╚══════════════════════════════════════╝");
 
   if (process.argv.includes("--students")) {

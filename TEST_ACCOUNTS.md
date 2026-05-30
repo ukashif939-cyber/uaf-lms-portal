@@ -46,7 +46,11 @@ npm run setup:demo
 ## Firebase Console
 
 Enable **Email/Password** and **Google** under Authentication → Sign-in method.  
-Add your hosting domain under Authorized domains.
+Add your hosting domain under Authorized domains (`uaf-lms-main.web.app`).
+
+## Repository
+
+https://github.com/ukashif939-cyber/uaf-lms-portal
 
 ---
 

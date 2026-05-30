@@ -1,5 +1,10 @@
 # UAF LMS — Database Setup Guide
-# How to go from zero to 1000 students in your PostgreSQL database
+
+> **Current demo setup:** This project uses **SQLite** and `npm run setup:demo` in `backend/`.  
+> See [README.md](./README.md) and [TEST_ACCOUNTS.md](./TEST_ACCOUNTS.md).  
+> The PostgreSQL steps below are optional for a future production database.
+
+# How to go from zero to 1000 students in PostgreSQL (optional)
 
 ---
 

@@ -20,6 +20,11 @@ if errorlevel 1 exit /b 1
 echo.
 echo [2/4] Building frontend (static export)...
 cd frontend
+if not exist ".env.production" (
+  echo Copying .env.production.example - edit with your Firebase keys if needed.
+  copy /Y .env.production.example .env.production >nul
+)
+set BUILD_FOR_FIREBASE=1
 call npm run build
 if errorlevel 1 exit /b 1
 cd ..

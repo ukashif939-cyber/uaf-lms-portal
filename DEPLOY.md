@@ -90,7 +90,7 @@ cd frontend && npm run dev   # port 3000
 | `firebase login` required | Run `npx firebase-tools login` |
 | API 404 after deploy | Wait 2–3 min for functions cold start; check `/api/health` |
 | Google login fails | Add `uaf-lms-main.web.app` to Firebase Auth authorized domains |
-| Build fails | Run from project root; ensure `frontend/.env.production` exists |
+| Build fails | Copy `frontend/.env.production.example` → `.env.production`; deploy sets `BUILD_FOR_FIREBASE=1` |
 
 ---
 
