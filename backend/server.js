@@ -39,6 +39,9 @@ app.use(cors({
     ) {
       return cb(null, true);
     }
+    if (process.env.K_SERVICE || process.env.FUNCTIONS_EMULATOR) {
+      return cb(null, true);
+    }
     cb(null, allowed[0]);
   },
   credentials: true,

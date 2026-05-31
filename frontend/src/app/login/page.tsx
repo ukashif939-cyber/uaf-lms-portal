@@ -86,7 +86,12 @@ export default function LoginPage() {
                 finishLogin(data.user, idToken, data.user);
             }
         } catch (err: unknown) {
-            setError(mapFirebaseAuthError(err));
+            const code = typeof err === "object" && err && "code" in err ? String((err as { code: string }).code) : "";
+            if (code.startsWith("auth/")) {
+                setError(mapFirebaseAuthError(err));
+            } else {
+                setError(err instanceof Error ? err.message : "Google sign-in failed.");
+            }
         } finally {
             setGoogleLoading(false);
         }

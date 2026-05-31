@@ -22,6 +22,17 @@ function copyBackend() {
     },
   });
 
+  const dbSrc = path.join(backendSrc, "prisma", "dev.db");
+  const dbDest = path.join(backendDest, "prisma", "dev.db");
+  if (existsSync(dbSrc)) {
+    const { copyFileSync, mkdirSync } = require("fs");
+    mkdirSync(path.dirname(dbDest), { recursive: true });
+    copyFileSync(dbSrc, dbDest);
+    console.log("✅ Copied prisma/dev.db for Cloud Functions");
+  } else {
+    console.warn("⚠️  backend/prisma/dev.db missing — run: cd backend && npm run setup:demo");
+  }
+
   console.log("✅ Copied backend → functions/backend");
 }
 

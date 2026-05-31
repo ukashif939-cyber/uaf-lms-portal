@@ -43,10 +43,17 @@ cd backend
 npm run setup:demo
 ```
 
-## Firebase Console
+## Firebase Console (required for Google login)
 
-Enable **Email/Password** and **Google** under Authentication → Sign-in method.  
-Add your hosting domain under Authorized domains (`uaf-lms-main.web.app`).
+1. [Authentication → Sign-in method](https://console.firebase.google.com/project/uaf-lms-main/authentication/providers)  
+   - Enable **Email/Password**  
+   - Enable **Google** (set support email)  
+2. [Authentication → Settings → Authorized domains](https://console.firebase.google.com/project/uaf-lms-main/authentication/settings)  
+   - `localhost`  
+   - `uaf-lms-main.web.app`  
+   - `uaf-lms-main.firebaseapp.com`  
+3. **Hosted site login** also needs the API (Cloud Functions). Upgrade to [Blaze](https://console.firebase.google.com/project/uaf-lms-main/usage/details) and run `deploy-firebase.bat`.  
+   - **Laptop:** use http://localhost:3000/login with `cd backend && npm run dev` + `cd frontend && npm run dev`
 
 ## Repository
 
